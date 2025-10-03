@@ -258,6 +258,16 @@ function createSummaryItem(label, value) {
     return summaryItem;
 }
 
+function createTermsLink(url, label = 'Company terms link') {
+    const link = document.createElement('a');
+    link.href = url;
+    link.target = '_blank';
+    link.rel = 'noopener noreferrer';
+    link.className = 'btn btn--sm btn--secondary';
+    link.textContent = label;
+    return link;
+}
+
 // Tab functionality
 function initializeTabs() {
     const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
@@ -755,6 +765,13 @@ function showSelectedCompanyClauses(companyName) {
     heading.textContent = `${company.name} - Contract Clauses`;
     container.appendChild(heading);
 
+    if (company.termsUrl) {
+        const actions = document.createElement('div');
+        actions.className = 'clause-actions';
+        actions.appendChild(createTermsLink(company.termsUrl, 'View company terms'));
+        container.appendChild(actions);
+    }
+
     container.appendChild(createClauseList(company));
 
     const muralHighlight = createMuralTransition(company, 'clauses');
@@ -817,6 +834,13 @@ function showCompanyDetails(companyName) {
     overview.appendChild(createDetailItem('Summary', company.details));
 
     modalBody.appendChild(overview);
+
+    if (company.termsUrl) {
+        const actions = document.createElement('div');
+        actions.className = 'detail-actions';
+        actions.appendChild(createTermsLink(company.termsUrl));
+        modalBody.appendChild(actions);
+    }
 
     const clausesSection = document.createElement('div');
     clausesSection.className = 'contract-clauses';

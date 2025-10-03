@@ -1206,6 +1206,17 @@ select.form-control {
   margin-bottom: var(--space-8);
 }
 
+.detail-actions,
+.clause-actions {
+  margin: var(--space-16) 0;
+}
+
+.detail-actions .btn,
+.clause-actions .btn {
+  display: inline-flex;
+  align-items: center;
+}
+
 /* Clauses grid (screenshot section) */
 #clauses .company-grid {
   background: #ededdb;

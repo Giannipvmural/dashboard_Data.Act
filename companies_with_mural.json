@@ -8,6 +8,7 @@
       "approach": "Strict",
       "keyFeatures": "Comprehensive addendum, switching charges withdrawn per DA Article 29",
       "details": "Requires payment of unpaid fees for remaining term. Comprehensive switching and exit plan provided.",
+      "termsUrl": "https://www.teradata.com/privacy/data-processing-addendum/data-act-addendum",
       "specificClauses": {
         "terminationClause": "Section 10.3: Upon termination of the Agreement according to paragraphs 10.1 and 10.2 the termination penalties to be paid by the Customer to the Provider will be due immediately. The termination penalty is the amount of the unpaid fees for the remaining term from the date of termination until end of the agreed Cloud Service Term set out in the Order.",
         "refundClause": "Section 10.3: Teradata will deduct from the penalty any fees that Teradata is refunded from the cloud platform provider, if any, as a result of the early termination of the Cloud Service Term. Under no circumstances does this provision require Teradata to seek such fees from the cloud platform provider.",
@@ -23,6 +24,7 @@
       "approach": "Strict",
       "keyFeatures": "Must pay remaining term fees, no other penalties",
       "details": "Outstanding subscription fees for remainder of term as early termination fee. No additional penalties.",
+      "termsUrl": "https://www.salesforce.com/news/stories/eu-data-act/",
       "specificClauses": {
         "terminationClause": "Section 2: Customer must pay any outstanding subscription fees covering the remainder of the term of the relevant Order Form(s) as an early termination fee. SFDC will not charge any other fees or penalties.",
         "refundClause": "Section 2: For the avoidance of doubt, such termination will not relieve Customer of its obligation to pay any fees due to SFDC for the period prior to the Termination Date of the relevant Order Form.",
@@ -38,6 +40,7 @@
       "approach": "Strict",
       "keyFeatures": "Strict enforcement, non-refundable prepaid amounts, 60-day notice",
       "details": "Requires 60-day notice (exceeding minimum). Prepaid amounts explicitly non-refundable.",
+      "termsUrl": "https://www.bmc.com/legal/agreements.html#:~:text=Regulatory%20Addendums",
       "specificClauses": {
         "terminationClause": "Section 4.5: Customer acknowledges and agrees that the switching or transferring right under this Section 4 is subject to payment by Customer to BMC, upon receipt of an invoice from BMC, of an early termination fee equal to the total fees that would have been payable for the period between the expiration of the Transitional Period and the end of the Term of the terminated Subscription Service(s) under the applicable Order.",
         "refundClause": "Section 4.5: Any fees paid in advance by Customer are non-refundable. If applicable, BMC will apply any amounts prepaid by Customer for the Remaining Term toward satisfaction of the early termination fee.",
@@ -53,6 +56,7 @@
       "approach": "Moderate",
       "keyFeatures": "33% early termination fee, extended transition period, pro-rated retrieval fees",
       "details": "Charges 33% of remaining subscription fees as early termination penalty. Offers transition period up to 3 months plus 30-day retrieval period.",
+      "termsUrl": "https://www.mural.co/terms/eu-data-act",
       "specificClauses": {
         "terminationClause": "In addition, in the event Customer notifies Mural of its intention to terminate the Services, for any remaining Subscription Term not paid for by the Customer at the time of such notice, the Customer agrees to pay Mural early termination fee equal to 33% of the agreed unpaid Subscription Fees applicable to the remainder of the Term.",
         "refundClause": "Customer will pay Mural the compensation which shall equal to pro-rated amount of the annual fees set forth in this Order Form for such Retrieval Period (30 days after transition period).",
@@ -69,6 +73,7 @@
       "approach": "Balanced",
       "keyFeatures": "Balanced approach, proportionate fees, clear distinction from switching fees",
       "details": "Applies proportionate early termination fee but distinguishes from switching charges. Fair and transparent.",
+      "termsUrl": "https://www.samsara.com/uk/legal/eu-data-act",
       "specificClauses": {
         "terminationClause": "Proportionate early termination fee based on remaining charges (specific clause not available in excerpt)",
         "refundClause": "No refunds mentioned - proportionate fees applied (specific clause not available)",
@@ -84,6 +89,7 @@
       "approach": "Customer-Friendly",
       "keyFeatures": "Free data transfer credits, proactive compliance",
       "details": "Waives data transfer fees globally. Proactive approach to customer choice and compliance.",
+      "termsUrl": "https://aws.amazon.com/service-terms/#:~:text=your%20affiliate%27s%20Agreement.-,1.28.,-These%20Service%20Terms",
       "specificClauses": {
         "terminationClause": "Not specified in available documentation",
         "refundClause": "Provides credits for data transfer when switching away from AWS",
@@ -99,6 +105,7 @@
       "approach": "Customer-Friendly",
       "keyFeatures": "No switching charges, comprehensive exit procedures",
       "details": "No switching charges imposed. Enhanced switching support with clear exit procedures.",
+      "termsUrl": "https://cloud.google.com/terms",
       "specificClauses": {
         "terminationClause": "Not specified in available documentation",
         "refundClause": "Free data transfer essentials service for switching customers",
@@ -114,6 +121,7 @@
       "approach": "Customer-Friendly",
       "keyFeatures": "Free data transfer for switching, following regulatory pressure",
       "details": "Waived data transfer fees in response to EU Data Act. Following regulatory direction.",
+      "termsUrl": "https://www.microsoft.com/licensing/docs/customeragreement",
       "specificClauses": {
         "terminationClause": "Not specified in available documentation",
         "refundClause": "Waived data transfer fees for switching customers",
@@ -129,6 +137,7 @@
       "approach": "Strict",
       "keyFeatures": "Explicit 'No Refunds' policy in addendum",
       "details": "Explicitly states 'No Refunds' in section 8 of their Data Act addendum.",
+      "termsUrl": "https://www.braze.com/company/legal/eu-data-act-addendum",
       "specificClauses": {
         "terminationClause": "Not specified in available excerpt",
         "refundClause": "Section 8: No Refunds - Explicitly stated in Data Act addendum",
@@ -144,6 +153,7 @@
       "approach": "Balanced",
       "keyFeatures": "Standard compliance implementation",
       "details": "Basic compliance addendum covering EU Data Act requirements.",
+      "termsUrl": "https://www.cloudflare.com/it-it/legal/data-act-addendum/",
       "specificClauses": {
         "terminationClause": "Not specified in available documentation",
         "refundClause": "Not specified in available documentation",
@@ -159,6 +169,7 @@
       "approach": "Balanced",
       "keyFeatures": "Standard compliance implementation",
       "details": "Standard compliance with data portability and switching support.",
+      "termsUrl": "https://toggl.com/legal/eu-data-act/",
       "specificClauses": {
         "terminationClause": "Not specified in available documentation",
         "refundClause": "Not specified in available documentation",
