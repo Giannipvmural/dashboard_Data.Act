@@ -319,6 +319,50 @@ body {
   box-sizing: inherit;
 }
 
+.loading-state {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: var(--space-12);
+  background: rgba(var(--color-brown-600-rgb), 0.08);
+  color: var(--color-text);
+  z-index: 999;
+  transition: opacity var(--duration-normal) var(--ease-standard),
+    visibility var(--duration-normal) var(--ease-standard);
+}
+
+.loading-state.hidden {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.loading-spinner {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: 4px solid rgba(var(--color-teal-500-rgb), 0.3);
+  border-top-color: var(--color-primary);
+  animation: spin 1s linear infinite;
+}
+
+.loading-message {
+  font-weight: var(--font-weight-medium);
+  font-size: var(--font-size-lg);
+}
+
+@keyframes spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 /* Typography */
 h1,
 h2,
@@ -780,11 +824,31 @@ select.form-control {
   box-shadow: var(--shadow-sm);
 }
 
+.stat-list {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.stat-list dt,
+.stat-list dd {
+  margin: 0;
+}
+
+.stat-list dt {
+  order: 2;
+}
+
+.stat-list dd {
+  order: 1;
+}
+
 .stat-number {
   font-size: var(--font-size-3xl);
   font-weight: var(--font-weight-bold);
   color: #5887ff;
-  margin-bottom: var(--space-4);
 }
 
 .stat-label {
@@ -863,6 +927,28 @@ select.form-control {
   position: relative;
   height: 300px;
   width: 100%;
+}
+
+.chart-container.empty canvas {
+  opacity: 0.2;
+}
+
+.chart-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 var(--space-16);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-md);
+  background: rgba(var(--color-brown-600-rgb), 0.05);
+  border-radius: var(--radius-md);
+}
+
+.chart-empty[hidden] {
+  display: none !important;
 }
 
 /* Spectrum Visualization */
@@ -990,14 +1076,23 @@ select.form-control {
 
 .filter-controls {
   display: grid;
-  grid-template-columns: 2fr 1fr 1fr;
+  grid-template-columns: minmax(0, 2fr) repeat(2, minmax(0, 1fr)) auto;
   gap: var(--space-16);
   align-items: center;
+}
+
+#exportButton {
+  justify-self: end;
+  white-space: nowrap;
 }
 
 @media (max-width: 768px) {
   .filter-controls {
     grid-template-columns: 1fr;
+  }
+
+  #exportButton {
+    justify-self: stretch;
   }
 }
 
@@ -1008,6 +1103,24 @@ select.form-control {
   border: 1px solid var(--color-card-border);
   overflow: hidden;
   box-shadow: var(--shadow-sm);
+}
+
+.table-empty {
+  padding: var(--space-20);
+  font-size: var(--font-size-md);
+  color: var(--color-text-secondary);
+  text-align: center;
+  border-top: 1px solid var(--color-card-border-inner);
+}
+
+.table-empty[hidden] {
+  display: none !important;
+}
+
+.table-empty-cell {
+  text-align: center;
+  color: var(--color-text-secondary);
+  padding: var(--space-20);
 }
 
 .company-table {
@@ -1546,6 +1659,10 @@ select.form-control {
   .filter-controls {
     grid-template-columns: 1fr;
     gap: var(--space-12);
+  }
+
+  #exportButton {
+    justify-self: stretch;
   }
   
   .company-grid {
