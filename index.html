@@ -5,35 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>EU Data Act Compliance Benchmark: Company Positions on Termination & Refunds</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js" defer></script>
 </head>
 <body>
+    <div class="loading-state" id="loadingState" role="status" aria-live="polite">
+        <span class="loading-spinner" aria-hidden="true"></span>
+        <span class="loading-message">Loading dashboard data…</span>
+    </div>
     <div class="container">
         <!-- Header Section -->
         <header class="dashboard-header">
             <h1>EU Data Act Compliance Benchmark: Company Positions on Termination & Refunds</h1>
             <p class="subtitle">Analysis of how major cloud and SaaS providers handle termination for convenience and refund policies</p>
             
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-number" id="total-companies">--</div>
-                    <div class="stat-label">Companies Analyzed</div>
+            <div class="stats-grid" role="list">
+                <div class="stat-card" role="listitem" aria-labelledby="total-companies-label">
+                    <dl class="stat-list">
+                        <dt class="stat-label" id="total-companies-label">Companies Analyzed</dt>
+                        <dd class="stat-number" id="total-companies" aria-live="polite">--</dd>
+                    </dl>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="strict-count">--</div>
-                    <div class="stat-label">Strict Approach</div>
+                <div class="stat-card" role="listitem" aria-labelledby="strict-count-label">
+                    <dl class="stat-list">
+                        <dt class="stat-label" id="strict-count-label">Strict Approach</dt>
+                        <dd class="stat-number" id="strict-count" aria-live="polite">--</dd>
+                    </dl>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="moderate-count">--</div>
-                    <div class="stat-label">Moderate Approach</div>
+                <div class="stat-card" role="listitem" aria-labelledby="moderate-count-label">
+                    <dl class="stat-list">
+                        <dt class="stat-label" id="moderate-count-label">Moderate Approach</dt>
+                        <dd class="stat-number" id="moderate-count" aria-live="polite">--</dd>
+                    </dl>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="friendly-count">--</div>
-                    <div class="stat-label">Customer-Friendly</div>
+                <div class="stat-card" role="listitem" aria-labelledby="friendly-count-label">
+                    <dl class="stat-list">
+                        <dt class="stat-label" id="friendly-count-label">Customer-Friendly</dt>
+                        <dd class="stat-number" id="friendly-count" aria-live="polite">--</dd>
+                    </dl>
                 </div>
-                <div class="stat-card">
-                    <div class="stat-number" id="balanced-count">--</div>
-                    <div class="stat-label">Balanced Approach</div>
+                <div class="stat-card" role="listitem" aria-labelledby="balanced-count-label">
+                    <dl class="stat-list">
+                        <dt class="stat-label" id="balanced-count-label">Balanced Approach</dt>
+                        <dd class="stat-number" id="balanced-count" aria-live="polite">--</dd>
+                    </dl>
                 </div>
             </div>
         </header>
@@ -52,15 +66,19 @@
             <div id="overview" class="tab-panel active" role="tabpanel" aria-labelledby="tab-overview" tabindex="0">
                 <div class="charts-grid">
                     <div class="chart-section">
-                        <h3>Termination Fee Approaches Distribution</h3>
+                        <h3 id="terminationChartHeading">Termination Fee Approaches Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="terminationChart"></canvas>
+                            <canvas id="terminationChart" role="img" aria-labelledby="terminationChartHeading terminationChartDesc">Bar chart comparing termination fee approaches.</canvas>
+                            <p class="chart-description sr-only" id="terminationChartDesc">Loading termination fee data…</p>
+                            <p class="chart-empty" id="terminationChartEmpty" hidden>No companies match the current filters, so there is no termination fee data to visualize.</p>
                         </div>
                     </div>
                     <div class="chart-section">
-                        <h3>Refund Policy Distribution</h3>
+                        <h3 id="refundChartHeading">Refund Policy Distribution</h3>
                         <div class="chart-container">
-                            <canvas id="refundChart"></canvas>
+                            <canvas id="refundChart" role="img" aria-labelledby="refundChartHeading refundChartDesc">Doughnut chart comparing refund policies.</canvas>
+                            <p class="chart-description sr-only" id="refundChartDesc">Loading refund policy data…</p>
+                            <p class="chart-empty" id="refundChartEmpty" hidden>No companies match the current filters, so there is no refund policy data to visualize.</p>
                         </div>
                     </div>
                 </div>
@@ -121,6 +139,7 @@
                             <option value="Credits/Free Transfer">Credits/Free Transfer</option>
                             <option value="Not Specified">Not Specified</option>
                         </select>
+                        <button type="button" id="exportButton" class="btn btn--outline">Download CSV</button>
                     </div>
                 </div>
                 
@@ -128,11 +147,11 @@
                     <table id="companyTable" class="company-table">
                         <thead>
                             <tr>
-                                <th class="sortable" data-column="name">Company</th>
-                                <th class="sortable" data-column="approach">Approach</th>
-                                <th class="sortable" data-column="terminationFee">Termination Fee</th>
-                                <th class="sortable" data-column="refundPolicy">Refund Policy</th>
-                                <th class="sortable" data-column="noticeMonths">Notice Period</th>
+                                <th scope="col" class="sortable" data-column="name" aria-sort="none">Company</th>
+                                <th scope="col" class="sortable" data-column="approach" aria-sort="none">Approach</th>
+                                <th scope="col" class="sortable" data-column="terminationFee" aria-sort="none">Termination Fee</th>
+                                <th scope="col" class="sortable" data-column="refundPolicy" aria-sort="none">Refund Policy</th>
+                                <th scope="col" class="sortable" data-column="noticeMonths" aria-sort="none">Notice Period</th>
                                 <th>Contract Details</th>
                             </tr>
                         </thead>
@@ -140,6 +159,7 @@
                             <!-- Populated by JavaScript -->
                         </tbody>
                     </table>
+                    <div class="table-empty" id="tableEmptyState" hidden>No companies match the current filters. Adjust your search or filter selections to see results.</div>
                 </div>
             </div>
 
@@ -236,7 +256,7 @@
         </main>
 
         <!-- Modal for Company Details -->
-        <div class="company-detail-modal hidden" id="companyModal">
+        <div class="company-detail-modal hidden" id="companyModal" role="dialog" aria-modal="true" aria-labelledby="modalCompanyName">
             <div class="modal-content">
                 <div class="modal-header">
                     <h3 id="modalCompanyName">Company Details</h3>
