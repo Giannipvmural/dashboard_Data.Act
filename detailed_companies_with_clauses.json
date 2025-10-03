@@ -1,0 +1,124 @@
+{
+  "companies": [
+    {
+      "name": "Teradata",
+      "noticeMonths": 2,
+      "terminationFee": "Full Remaining Term",
+      "refundPolicy": "No Refunds",
+      "approach": "Strict",
+      "keyFeatures": "Comprehensive addendum, switching charges withdrawn per DA Article 29",
+      "details": "Requires payment of unpaid fees for remaining term. Comprehensive switching and exit plan provided.",
+      "specificClauses": {
+        "terminationClause": "Section 10.3: Upon termination of the Agreement according to paragraphs 10.1 and 10.2 the termination penalties to be paid by the Customer to the Provider will be due immediately. The termination penalty is the amount of the unpaid fees for the remaining term from the date of termination until end of the agreed Cloud Service Term set out in the Order.",
+        "refundClause": "Section 10.3: Teradata will deduct from the penalty any fees that Teradata is refunded from the cloud platform provider, if any, as a result of the early termination of the Cloud Service Term. Under no circumstances does this provision require Teradata to seek such fees from the cloud platform provider.",
+        "noticeClause": "Section 4.1: The Customer must give the Provider a switching notice that it initiates the switching, observing the Notice Period of two months.",
+        "switchingFeesClause": "Section 9.1: The charges to be paid by the Customer for switching will be confirmed by Teradata at the time when the Customer has initiated the switching process. Switching charges will be gradually withdrawn in accordance with Article 29 of the Data Act."
+      }
+    },
+    {
+      "name": "Salesforce",
+      "noticeMonths": 2,
+      "terminationFee": "Full Remaining Term",
+      "refundPolicy": "No Refunds",
+      "approach": "Strict",
+      "keyFeatures": "Must pay remaining term fees, no other penalties",
+      "details": "Outstanding subscription fees for remainder of term as early termination fee. No additional penalties.",
+      "specificClauses": {
+        "terminationClause": "Section 2: Customer must pay any outstanding subscription fees covering the remainder of the term of the relevant Order Form(s) as an early termination fee. SFDC will not charge any other fees or penalties.",
+        "refundClause": "Section 2: For the avoidance of doubt, such termination will not relieve Customer of its obligation to pay any fees due to SFDC for the period prior to the Termination Date of the relevant Order Form.",
+        "noticeClause": "Section 1: A Customer who is registered in a member state of the EU/EEA, may complete this form to request at any time during a subscription term with a 2-month notification period",
+        "switchingFeesClause": "Section 2: SFDC will not charge any other fees or penalties [beyond the early termination fee]."
+      }
+    },
+    {
+      "name": "BMC",
+      "noticeMonths": 2,
+      "terminationFee": "Full Remaining Term",
+      "refundPolicy": "No Refunds",
+      "approach": "Strict",
+      "keyFeatures": "Strict enforcement, non-refundable prepaid amounts, 60-day notice",
+      "details": "Requires 60-day notice (exceeding minimum). Prepaid amounts explicitly non-refundable.",
+      "specificClauses": {
+        "terminationClause": "Section 4.5: Customer acknowledges and agrees that the switching or transferring right under this Section 4 is subject to payment by Customer to BMC, upon receipt of an invoice from BMC, of an early termination fee equal to the total fees that would have been payable for the period between the expiration of the Transitional Period and the end of the Term of the terminated Subscription Service(s) under the applicable Order.",
+        "refundClause": "Section 4.5: Any fees paid in advance by Customer are non-refundable. If applicable, BMC will apply any amounts prepaid by Customer for the Remaining Term toward satisfaction of the early termination fee.",
+        "noticeClause": "Section 4.1: Customer may switch from a Subscription Service to a data processing service offered by a different provider by providing BMC with a sixty (60) days' prior written notice",
+        "switchingFeesClause": "Section 4.6: No switch or transfer will relieve Customer of the obligation to pay any fees accrued or payable to BMC pursuant to any Order or this Data Act Addendum."
+      }
+    },
+    {
+      "name": "Samsara",
+      "noticeMonths": 2,
+      "terminationFee": "Proportionate Fee",
+      "refundPolicy": "No Refunds",
+      "approach": "Balanced",
+      "keyFeatures": "Balanced approach, proportionate fees, clear distinction from switching fees",
+      "details": "Applies proportionate early termination fee but distinguishes from switching charges. Fair and transparent.",
+      "specificClauses": {
+        "terminationClause": "Proportionate early termination fee based on remaining charges (specific clause not available in excerpt)",
+        "refundClause": "No refunds mentioned - proportionate fees applied (specific clause not available)",
+        "noticeClause": "2-month notice period per EU Data Act requirements",
+        "switchingFeesClause": "Not a switching fee - early termination fee distinction made"
+      }
+    },
+    {
+      "name": "AWS",
+      "noticeMonths": 2,
+      "terminationFee": "Not Specified",
+      "refundPolicy": "Credits/Free Transfer",
+      "approach": "Customer-Friendly",
+      "keyFeatures": "Free data transfer credits, proactive compliance",
+      "details": "Waives data transfer fees globally. Proactive approach to customer choice and compliance.",
+      "specificClauses": {
+        "terminationClause": "Not specified in available documentation",
+        "refundClause": "Provides credits for data transfer when switching away from AWS",
+        "noticeClause": "2-month notice period per EU Data Act requirements",
+        "switchingFeesClause": "AWS Blog: 'We're waiving data transfer out to the internet charges for customers who want to move their data out of AWS'"
+      }
+    },
+    {
+      "name": "Google Cloud",
+      "noticeMonths": 2,
+      "terminationFee": "Not Specified",
+      "refundPolicy": "Credits/Free Transfer",
+      "approach": "Customer-Friendly",
+      "keyFeatures": "No switching charges, comprehensive exit procedures",
+      "details": "No switching charges imposed. Enhanced switching support with clear exit procedures.",
+      "specificClauses": {
+        "terminationClause": "Not specified in available documentation",
+        "refundClause": "Free data transfer essentials service for switching customers",
+        "noticeClause": "2-month notice period per EU Data Act requirements",
+        "switchingFeesClause": "No switching charges for the switching process"
+      }
+    },
+    {
+      "name": "Microsoft",
+      "noticeMonths": 2,
+      "terminationFee": "Not Specified",
+      "refundPolicy": "Credits/Free Transfer",
+      "approach": "Customer-Friendly",
+      "keyFeatures": "Free data transfer for switching, following regulatory pressure",
+      "details": "Waived data transfer fees in response to EU Data Act. Following regulatory direction.",
+      "specificClauses": {
+        "terminationClause": "Not specified in available documentation",
+        "refundClause": "Waived data transfer fees for switching customers",
+        "noticeClause": "2-month notice period per EU Data Act requirements",
+        "switchingFeesClause": "Waived data transfer fees for switching following regulatory pressure"
+      }
+    },
+    {
+      "name": "Braze",
+      "noticeMonths": 2,
+      "terminationFee": "Not Specified",
+      "refundPolicy": "No Refunds",
+      "approach": "Strict",
+      "keyFeatures": "Explicit 'No Refunds' policy in addendum",
+      "details": "Explicitly states 'No Refunds' in section 8 of their Data Act addendum.",
+      "specificClauses": {
+        "terminationClause": "Not specified in available excerpt",
+        "refundClause": "Section 8: No Refunds - Explicitly stated in Data Act addendum",
+        "noticeClause": "2-month notice period per EU Data Act requirements",
+        "switchingFeesClause": "Not specified in available documentation"
+      }
+    }
+  ]
+}
