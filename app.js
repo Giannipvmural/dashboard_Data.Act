@@ -5,6 +5,31 @@ let companiesData = createDashboardData({ companies: [] });
 // Global variables
 let currentSort = { column: null, direction: 'asc' };
 let filteredCompanies = [...companiesData.companies];
+let currentSummary = companiesData.summary;
+let terminationChartInstance = null;
+let refundChartInstance = null;
+let restoreFocusElement = null;
+let releaseFocusTrap = null;
+
+const FOCUSABLE_SELECTORS = [
+    'a[href]',
+    'area[href]',
+    'button:not([disabled])',
+    'input:not([disabled]):not([type="hidden"])',
+    'select:not([disabled])',
+    'textarea:not([disabled])',
+    '[tabindex]:not([tabindex="-1"])'
+].join(', ');
+
+const DASHBOARD_STATE_KEY = 'dataActDashboardState';
+
+function setLoadingState(isLoading) {
+    const loadingElement = document.getElementById('loadingState');
+    if (!loadingElement) {
+        return;
+    }
+    loadingElement.classList.toggle('hidden', !isLoading);
+}
 
 // Initialize the dashboard
 document.addEventListener('DOMContentLoaded', function() {
@@ -12,10 +37,12 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 async function bootstrapDashboard() {
+    setLoadingState(true);
     try {
         const rawData = await fetchCompaniesData();
         companiesData = createDashboardData(rawData);
         filteredCompanies = [...companiesData.companies];
+        currentSummary = companiesData.summary;
 
         initializeTabs();
         initializeCharts();
@@ -24,9 +51,13 @@ async function bootstrapDashboard() {
         initializeCompanyGrid();
         initializeModal();
         initializeClausesTab();
-        updateStats();
+        initializeExportButton();
+        applyPersistedState();
+        refreshDashboardVisuals();
     } catch (error) {
         reportInitializationError(error);
+    } finally {
+        setLoadingState(false);
     }
 }
 
@@ -268,6 +299,18 @@ function createTermsLink(url, label = 'Company terms link') {
     return link;
 }
 
+function initializeExportButton() {
+    const exportButton = document.getElementById('exportButton');
+    if (!exportButton) {
+        return;
+    }
+
+    exportButton.addEventListener('click', () => {
+        exportTable();
+        exportButton.blur();
+    });
+}
+
 // Tab functionality
 function initializeTabs() {
     const tabButtons = Array.from(document.querySelectorAll('.tab-button'));
@@ -353,30 +396,31 @@ function initializeTabs() {
 
 // Chart initialization
 function initializeCharts() {
-    createTerminationChart();
-    createRefundChart();
+    terminationChartInstance = createTerminationChart();
+    refundChartInstance = createRefundChart();
 }
 
 function createTerminationChart() {
     const canvas = document.getElementById('terminationChart');
     if (!canvas) {
-        return;
+        return null;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-        return;
+        return null;
     }
-    
+
+    const summary = currentSummary;
     const data = {
         labels: ['Full Remaining Term (100%)', 'Partial Term (33%)', 'Proportionate Fee', 'Not Specified'],
         datasets: [{
             label: 'Number of Companies',
             data: [
-                companiesData.summary.terminationFeeStats.fullRemainingTerm,
-                companiesData.summary.terminationFeeStats.partialRemainingTerm,
-                companiesData.summary.terminationFeeStats.proportionateFee,
-                companiesData.summary.terminationFeeStats.notSpecified
+                summary.terminationFeeStats.fullRemainingTerm,
+                summary.terminationFeeStats.partialRemainingTerm,
+                summary.terminationFeeStats.proportionateFee,
+                summary.terminationFeeStats.notSpecified
             ],
             backgroundColor: ['#5887FF', '#79C1FF', '#00C27A', '#FC83FF'],
             borderColor: ['#3B64E0', '#4F9DE6', '#008B59', '#C650D5'],
@@ -384,7 +428,7 @@ function createTerminationChart() {
         }]
     };
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'bar',
         data: data,
         options: {
@@ -397,7 +441,7 @@ function createTerminationChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const percentage = Math.round((context.raw / companiesData.summary.totalCompanies) * 100);
+                            const percentage = Math.round((context.raw / (summary.totalCompanies || 1)) * 100);
                             return `${context.raw} companies (${percentage}%)`;
                         }
                     }
@@ -418,22 +462,22 @@ function createTerminationChart() {
 function createRefundChart() {
     const canvas = document.getElementById('refundChart');
     if (!canvas) {
-        return;
+        return null;
     }
 
     const ctx = canvas.getContext('2d');
     if (!ctx) {
-        return;
+        return null;
     }
-    
+    const summary = currentSummary;
     const data = {
         labels: ['No Refunds', 'Credits/Free Transfer', 'Not Specified', 'Pro-rated Fees'],
         datasets: [{
             data: [
-                companiesData.summary.refundStats.noRefunds,
-                companiesData.summary.refundStats.creditsTransfer,
-                companiesData.summary.refundStats.notSpecified,
-                companiesData.summary.refundStats.proRatedFees
+                summary.refundStats.noRefunds,
+                summary.refundStats.creditsTransfer,
+                summary.refundStats.notSpecified,
+                summary.refundStats.proRatedFees
             ],
             backgroundColor: ['#FC83FF', '#5887FF', '#8FEC7F', '#00C27A'],
             borderColor: ['#C650D5', '#3B64E0', '#52C459', '#008B59'],
@@ -441,7 +485,7 @@ function createRefundChart() {
         }]
     };
 
-    new Chart(ctx, {
+    return new Chart(ctx, {
         type: 'doughnut',
         data: data,
         options: {
@@ -458,7 +502,7 @@ function createRefundChart() {
                 tooltip: {
                     callbacks: {
                         label: function(context) {
-                            const percentage = Math.round((context.raw / companiesData.summary.totalCompanies) * 100);
+                            const percentage = Math.round((context.raw / (summary.totalCompanies || 1)) * 100);
                             return `${context.label}: ${context.raw} (${percentage}%)`;
                         }
                     }
@@ -494,46 +538,61 @@ function renderTable(companies) {
 
     tbody.textContent = '';
 
-    companies.forEach(company => {
-        const row = document.createElement('tr');
+    if (!companies.length) {
+        const emptyRow = document.createElement('tr');
+        const emptyCell = document.createElement('td');
+        emptyCell.colSpan = 6;
+        emptyCell.className = 'table-empty-cell';
+        emptyCell.textContent = 'No companies match the current filters.';
+        emptyRow.appendChild(emptyCell);
+        tbody.appendChild(emptyRow);
+    } else {
+        companies.forEach(company => {
+            const row = document.createElement('tr');
 
-        const nameCell = document.createElement('td');
-        const nameStrong = document.createElement('strong');
-        nameStrong.textContent = company.name;
-        nameCell.appendChild(nameStrong);
-        row.appendChild(nameCell);
+            const nameCell = document.createElement('td');
+            const nameStrong = document.createElement('strong');
+            nameStrong.textContent = company.name;
+            nameCell.appendChild(nameStrong);
+            row.appendChild(nameCell);
 
-        const approachCell = document.createElement('td');
-        const approachBadge = document.createElement('span');
-        approachBadge.className = `approach-badge ${getApproachClass(company.approach)}`;
-        approachBadge.textContent = company.approach;
-        approachCell.appendChild(approachBadge);
-        row.appendChild(approachCell);
+            const approachCell = document.createElement('td');
+            const approachBadge = document.createElement('span');
+            approachBadge.className = `approach-badge ${getApproachClass(company.approach)}`;
+            approachBadge.textContent = company.approach;
+            approachCell.appendChild(approachBadge);
+            row.appendChild(approachCell);
 
-        const terminationCell = document.createElement('td');
-        terminationCell.textContent = company.terminationFee || 'Not specified';
-        row.appendChild(terminationCell);
+            const terminationCell = document.createElement('td');
+            terminationCell.textContent = company.terminationFee || 'Not specified';
+            row.appendChild(terminationCell);
 
-        const refundCell = document.createElement('td');
-        refundCell.textContent = company.refundPolicy || 'Not specified';
-        row.appendChild(refundCell);
+            const refundCell = document.createElement('td');
+            refundCell.textContent = company.refundPolicy || 'Not specified';
+            row.appendChild(refundCell);
 
-        const noticeCell = document.createElement('td');
-        noticeCell.textContent = company.noticeMonths ? `${company.noticeMonths} months` : 'Not specified';
-        row.appendChild(noticeCell);
+            const noticeCell = document.createElement('td');
+            noticeCell.textContent = company.noticeMonths ? `${company.noticeMonths} months` : 'Not specified';
+            row.appendChild(noticeCell);
 
-        const actionsCell = document.createElement('td');
-        const detailsButton = document.createElement('button');
-        detailsButton.className = 'btn btn--sm btn--primary';
-        detailsButton.type = 'button';
-        detailsButton.dataset.action = 'view-company';
-        detailsButton.dataset.company = company.name;
-        detailsButton.textContent = 'View Details';
-        actionsCell.appendChild(detailsButton);
-        row.appendChild(actionsCell);
+            const actionsCell = document.createElement('td');
+            const detailsButton = document.createElement('button');
+            detailsButton.className = 'btn btn--sm btn--primary';
+            detailsButton.type = 'button';
+            detailsButton.dataset.action = 'view-company';
+            detailsButton.dataset.company = company.name;
+            detailsButton.textContent = 'View Details';
+            actionsCell.appendChild(detailsButton);
+            row.appendChild(actionsCell);
 
-        tbody.appendChild(row);
-    });
+            tbody.appendChild(row);
+        });
+    }
+
+    const emptyState = document.getElementById('tableEmptyState');
+    if (emptyState) {
+        emptyState.hidden = Boolean(companies.length);
+    }
 }
 
 function handleCompanyTableClick(event) {
@@ -558,14 +617,16 @@ function getApproachClass(approach) {
     }
 }
 
-function sortTable(column) {
+function sortTable(column, { preserveDirection = false, persist = true } = {}) {
     if (currentSort.column === column) {
-        currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        if (!preserveDirection) {
+            currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        }
     } else {
         currentSort.column = column;
-        currentSort.direction = 'asc';
+        currentSort.direction = preserveDirection && currentSort.direction ? currentSort.direction : 'asc';
     }
-    
+
     filteredCompanies.sort((a, b) => {
         let aVal = a[column];
         let bVal = b[column];
@@ -579,8 +640,21 @@ function sortTable(column) {
         if (aVal > bVal) return currentSort.direction === 'asc' ? 1 : -1;
         return 0;
     });
-    
+
+    document.querySelectorAll('.sortable').forEach(header => {
+        header.setAttribute('aria-sort', 'none');
+    });
+
+    const activeHeader = document.querySelector(`.sortable[data-column="${column}"]`);
+    if (activeHeader) {
+        activeHeader.setAttribute('aria-sort', currentSort.direction === 'asc' ? 'ascending' : 'descending');
+    }
+
     renderTable(filteredCompanies);
+
+    if (persist) {
+        saveDashboardState();
+    }
 }
 
 // Filter functionality
@@ -612,8 +686,79 @@ function applyFilters() {
         
         return matchesSearch && matchesApproach && matchesRefund;
     });
+    currentSummary = generateSummary(filteredCompanies);
     
-    renderTable(filteredCompanies);
+    if (currentSort.column) {
+        sortTable(currentSort.column, { preserveDirection: true, persist: false });
+    } else {
+        renderTable(filteredCompanies);
+    }
+    refreshDashboardVisuals();
+    saveDashboardState();
+}
+
+function applyPersistedState() {
+    const persistedState = loadDashboardState();
+    if (!persistedState) {
+        return;
+    }
+
+    const searchInput = document.getElementById('searchInput');
+    const approachFilter = document.getElementById('approachFilter');
+    const refundFilter = document.getElementById('refundFilter');
+
+    if (searchInput && typeof persistedState.searchTerm === 'string') {
+        searchInput.value = persistedState.searchTerm;
+    }
+
+    if (approachFilter && typeof persistedState.approachFilter === 'string') {
+        approachFilter.value = persistedState.approachFilter;
+    }
+
+    if (refundFilter && typeof persistedState.refundFilter === 'string') {
+        refundFilter.value = persistedState.refundFilter;
+    }
+
+    currentSort.column = persistedState.sortColumn || null;
+    currentSort.direction = persistedState.sortDirection || 'asc';
+
+    applyFilters();
+}
+
+function loadDashboardState() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+        return null;
+    }
+
+    try {
+        const raw = window.localStorage.getItem(DASHBOARD_STATE_KEY);
+        if (!raw) {
+            return null;
+        }
+        return JSON.parse(raw);
+    } catch (error) {
+        console.warn('Unable to load dashboard state from storage.', error);
+        return null;
+    }
+}
+
+function saveDashboardState() {
+    if (typeof window === 'undefined' || !window.localStorage) {
+        return;
+    }
+
+    try {
+        const state = {
+            searchTerm: document.getElementById('searchInput')?.value || '',
+            approachFilter: document.getElementById('approachFilter')?.value || '',
+            refundFilter: document.getElementById('refundFilter')?.value || '',
+            sortColumn: currentSort.column,
+            sortDirection: currentSort.direction
+        };
+        window.localStorage.setItem(DASHBOARD_STATE_KEY, JSON.stringify(state));
+    } catch (error) {
+        console.warn('Unable to save dashboard state to storage.', error);
+    }
 }
 
 function populateFilterOptions(approachFilter, refundFilter) {
@@ -787,7 +932,12 @@ function initializeModal() {
     if (!modal || !closeBtn) {
         return;
     }
-    
+    modal.setAttribute('tabindex', '-1');
+    modal.setAttribute('aria-modal', 'true');
+    if (!modal.getAttribute('role')) {
+        modal.setAttribute('role', 'dialog');
+    }
+
     // Close button event listener
     closeBtn.addEventListener('click', function(e) {
         e.preventDefault();
@@ -808,6 +958,64 @@ function initializeModal() {
             closeModal();
         }
     });
+}
+
+function activateFocusTrap(modal) {
+    const getFocusableElements = () => Array.from(modal.querySelectorAll(FOCUSABLE_SELECTORS))
+        .filter(element => {
+            if (element.hasAttribute('disabled') || element.getAttribute('aria-hidden') === 'true') {
+                return false;
+            }
+            return element.tabIndex !== -1 && element.getClientRects().length > 0;
+        });
+
+    const ensureFocusWithin = (event) => {
+        const focusableElements = getFocusableElements();
+        if (!focusableElements.length) {
+            event.preventDefault();
+            modal.focus();
+            return;
+        }
+
+        const [firstElement] = focusableElements;
+        const lastElement = focusableElements[focusableElements.length - 1];
+
+        if (event.shiftKey) {
+            if (document.activeElement === firstElement || !modal.contains(document.activeElement)) {
+                event.preventDefault();
+                lastElement.focus();
+            }
+        } else if (document.activeElement === lastElement) {
+            event.preventDefault();
+            firstElement.focus();
+        }
+    };
+
+    const handleKeydown = (event) => {
+        if (event.key === 'Tab') {
+            ensureFocusWithin(event);
+        }
+    };
+
+    const handleFocusIn = (event) => {
+        if (!modal.contains(event.target)) {
+            const focusableElements = getFocusableElements();
+            const fallbackTarget = focusableElements[0] || modal;
+            fallbackTarget.focus();
+        }
+    };
+
+    modal.addEventListener('keydown', handleKeydown);
+    document.addEventListener('focusin', handleFocusIn);
+
+    const focusableElements = getFocusableElements();
+    const initialTarget = focusableElements[0] || modal;
+    window.requestAnimationFrame(() => initialTarget.focus());
+
+    return () => {
+        modal.removeEventListener('keydown', handleKeydown);
+        document.removeEventListener('focusin', handleFocusIn);
+    };
 }
 
 function showCompanyDetails(companyName) {
@@ -866,27 +1074,46 @@ function showCompanyDetails(companyName) {
 
     modalBody.appendChild(policySummary);
     
+    restoreFocusElement = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+
     modal.classList.remove('hidden');
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
+
+    if (typeof releaseFocusTrap === 'function') {
+        releaseFocusTrap();
+    }
+    releaseFocusTrap = activateFocusTrap(modal);
 }
 
 function closeModal() {
     const modal = document.getElementById('companyModal');
+    if (!modal) {
+        return;
+    }
     modal.classList.remove('active');
     modal.classList.add('hidden');
     document.body.style.overflow = 'auto';
+
+    if (typeof releaseFocusTrap === 'function') {
+        releaseFocusTrap();
+        releaseFocusTrap = null;
+    }
+
+    if (restoreFocusElement && typeof restoreFocusElement.focus === 'function') {
+        restoreFocusElement.focus();
+    }
+    restoreFocusElement = null;
 }
 
 // Update stats in header
 function updateStats() {
-    const { summary } = companiesData;
     const statElements = [
-        ['total-companies', summary.totalCompanies],
-        ['strict-count', summary.strictApproach],
-        ['moderate-count', summary.moderate],
-        ['friendly-count', summary.customerFriendly],
-        ['balanced-count', summary.balanced]
+        ['total-companies', currentSummary.totalCompanies],
+        ['strict-count', currentSummary.strictApproach],
+        ['moderate-count', currentSummary.moderate],
+        ['friendly-count', currentSummary.customerFriendly],
+        ['balanced-count', currentSummary.balanced]
     ];
 
     statElements.forEach(([id, value]) => {
@@ -897,10 +1124,10 @@ function updateStats() {
     });
 
     const percentMap = {
-        strictApproachPercent: getPercentage(summary.strictApproach, summary.totalCompanies),
-        moderatePercent: getPercentage(summary.moderate, summary.totalCompanies),
-        customerFriendlyPercent: getPercentage(summary.customerFriendly, summary.totalCompanies),
-        balancedPercent: getPercentage(summary.balanced, summary.totalCompanies)
+        strictApproachPercent: getPercentage(currentSummary.strictApproach, currentSummary.totalCompanies),
+        moderatePercent: getPercentage(currentSummary.moderate, currentSummary.totalCompanies),
+        customerFriendlyPercent: getPercentage(currentSummary.customerFriendly, currentSummary.totalCompanies),
+        balancedPercent: getPercentage(currentSummary.balanced, currentSummary.totalCompanies)
     };
 
     document.querySelectorAll('[data-summary]').forEach(element => {
@@ -909,6 +1136,98 @@ function updateStats() {
             element.textContent = percentMap[key];
         }
     });
+}
+
+function updateCharts() {
+    if (terminationChartInstance) {
+        terminationChartInstance.data.datasets[0].data = [
+            currentSummary.terminationFeeStats.fullRemainingTerm,
+            currentSummary.terminationFeeStats.partialRemainingTerm,
+            currentSummary.terminationFeeStats.proportionateFee,
+            currentSummary.terminationFeeStats.notSpecified
+        ];
+        terminationChartInstance.update();
+    }
+
+    if (refundChartInstance) {
+        refundChartInstance.data.datasets[0].data = [
+            currentSummary.refundStats.noRefunds,
+            currentSummary.refundStats.creditsTransfer,
+            currentSummary.refundStats.notSpecified,
+            currentSummary.refundStats.proRatedFees
+        ];
+        refundChartInstance.update();
+    }
+}
+
+function updateChartDescriptions() {
+    const terminationDesc = document.getElementById('terminationChartDesc');
+    if (terminationDesc) {
+        if (!currentSummary.totalCompanies) {
+            terminationDesc.textContent = 'No companies match the current filters, so the termination fee chart has no data to display.';
+        } else {
+            terminationDesc.textContent =
+                `Out of ${currentSummary.totalCompanies} companies, ${currentSummary.terminationFeeStats.fullRemainingTerm} require full remaining term fees, ` +
+                `${currentSummary.terminationFeeStats.partialRemainingTerm} charge partial fees around 33%, ${currentSummary.terminationFeeStats.proportionateFee} use proportionate fees, ` +
+                `and ${currentSummary.terminationFeeStats.notSpecified} do not specify their termination policy.`;
+        }
+    }
+
+    const refundDesc = document.getElementById('refundChartDesc');
+    if (refundDesc) {
+        if (!currentSummary.totalCompanies) {
+            refundDesc.textContent = 'No companies match the current filters, so the refund policy chart has no data to display.';
+        } else {
+            refundDesc.textContent =
+                `Refund policies show ${currentSummary.refundStats.noRefunds} companies with no refunds, ` +
+                `${currentSummary.refundStats.creditsTransfer} offering credits or free transfers, ${currentSummary.refundStats.proRatedFees} with pro-rated fees, ` +
+                `and ${currentSummary.refundStats.notSpecified} without published details.`;
+        }
+    }
+}
+
+function refreshDashboardVisuals() {
+    updateStats();
+    updateCharts();
+    updateChartDescriptions();
+    updateChartEmptyStates();
+}
+
+function updateChartEmptyStates() {
+    const terminationTotal = Object.values(currentSummary.terminationFeeStats || {}).reduce((sum, count) => sum + count, 0);
+    const refundTotal = Object.values(currentSummary.refundStats || {}).reduce((sum, count) => sum + count, 0);
+
+    setChartEmptyState({
+        canvasId: 'terminationChart',
+        emptyId: 'terminationChartEmpty',
+        hasData: terminationTotal > 0
+    });
+
+    setChartEmptyState({
+        canvasId: 'refundChart',
+        emptyId: 'refundChartEmpty',
+        hasData: refundTotal > 0
+    });
+}
+
+function setChartEmptyState({ canvasId, emptyId, hasData }) {
+    const canvas = document.getElementById(canvasId);
+    const emptyMessage = document.getElementById(emptyId);
+    if (!canvas || !emptyMessage) {
+        return;
+    }
+
+    const container = canvas.closest('.chart-container');
+    const shouldHideCanvas = !hasData;
+
+    emptyMessage.hidden = hasData;
+
+    if (container) {
+        container.classList.toggle('empty', shouldHideCanvas);
+    }
+
+    canvas.setAttribute('aria-hidden', shouldHideCanvas ? 'true' : 'false');
+    canvas.style.visibility = shouldHideCanvas ? 'hidden' : 'visible';
 }
 
 function getPercentage(count, total) {
